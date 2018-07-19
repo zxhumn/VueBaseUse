@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            height: 100%;
+            width: 100%;
+            display: flex;
+        }
+
+        .container>textarea {
+            flex: 2;
+            background-color: hotpink;
+        }
+
+        .container>div {
+            flex: 2;
+            background-color: skyblue;
+        }
+
+        Edit in JSFiddle Result HTML JavaScript CSS html,
+        body,
+        #editor {
+            margin: 0;
+            height: 100%;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #333;
+        }
+
+        textarea,
+        #editor div {
+            display: inline-block;
+            width: 49%;
+            height: 100%;
+            vertical-align: top;
+            box-sizing: border-box;
+            padding: 0 20px;
+        }
+
+        textarea {
+            border: none;
+            border-right: 1px solid #ccc;
+            resize: none;
+            outline: none;
+            background-color: #f6f6f6;
+            font-size: 14px;
+            font-family: 'Monaco', courier, monospace;
+            padding: 20px;
+        }
+
+        code {
+            color: #f66;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="editor" class="container">
+        <textarea v-model="message" @input='inputValue'></textarea>
+        <div v-html="mdMessage"></div>
+    </div>
+</body>
+
+</html>
+<script src="./lib/vue.js"></script>
+<!-- 
+    这个js库 会解析 传入内容中 markdown相关的语法 
+    解析为 对应的html结构 接着就可以使用在对应的地方啦
+-->
+<script src="https://unpkg.com/marked@0.3.6"></script>
+<script>
+    /*      
+            marked(this.input, { sanitize: true })
+            因为需要解析为HTML,所以这里使用的指令是 v-html
+    */
+    // 实例化
+    let app = new Vue({
+        el: '.container',
+        data: {
+            message: '',
+            mdMessage: ''
+        },
+        methods: {
+            inputValue() {
+                // console.log(this);
+                this.mdMessage = marked(this.message, {
+                    sanitize: true
+                });
+            }
+        }
+    })
+</script>
