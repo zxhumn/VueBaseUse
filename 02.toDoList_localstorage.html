@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        ul {
+            list-style: none;
+            width: 500px;
+            margin: 0 auto;
+        }
+
+        li {
+            font-size: 22px;
+            font-weight: 700;
+            color: hotpink;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        #app {
+            text-align: center;
+        }
+
+        ul>li {
+            text-align: left;
+        }
+
+        li.done span {
+            text-decoration: line-through;
+            color: gray;
+        }
+
+        li a {
+            text-decoration: none;
+            color: white;
+            border: 1px solid #000;
+            border-radius: 50%;
+            background-color: black;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            float: right;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>任务列表</h2>
+    <div id="app">
+        <input v-model="someThing" type="text" placeholder="请输入待办事项">
+        <input v-on:click="add" type="button" value="增加">
+        <br>
+        <h3>总数:{{list.length}}--已完成:{{doneNum}}</h3>
+        <ul>
+            <!-- item 遍历是 会把每一个元素 丢到item中  index 下表 -->
+            <li v-bind:class="{ done: item.isDone }" v-for="(item, index) in list" v-on:click="doThis(index)">
+                <span>{{index+1}}.{{item.name}}</span>
+                <!-- <button>X</button> -->
+                <!-- 阻止事件冒泡 -->
+                <a v-on:click.stop="remove(index)" href="javascript:void(0)">8</a>
+            </li>
+        </ul>
+    </div>
+</body>
+
+</html>
+<script src="./lib/vue.js"></script>
+<script>
+    //
+    /*
+    数组保存toDo的列表
+        [
+            {
+                name:'买菜',
+                isDone:false
+            },
+            {
+                name:'洗菜',
+                isDone:false
+            },
+            {
+                name:'切菜',
+                isDone:false
+            },
+            {
+                name:'烧菜',
+                isDone:false
+            } 
+        ]
+v-bind 专门用来操纵元素属性的
+v-on 可以在绑定是 传入具体的参数 
+            v-on:click="del(index)"
+v-on 依旧是为dom元素绑定事件 依旧会有 冒泡 跟 默认行为 在适当的情况下需要进行阻止
+            事件冒泡
+                触发了子元素的某个事件时,会依次逐级的触发父元素的同名事件
+计算属性
+跟 data  el methods 平级的
+computed
+    作用是 如果某一个数据的值 需要经历复杂的计算 才能算出来 
+    可以写在computed中 以返回值的方式 返回
+    vue 解析的时候 直接调用这个函数 把返回值 放在那个位置
+*/
+
+
+    /*
+        数据常驻
+        打开页面
+                读取保存的数据
+                    数据存在
+                        string->js对象(数组)
+                    数据不存在
+                        初始数据 空数组
+    */
+    // 读取保存的数据
+    let list = window.localStorage.getItem('list');
+    // 数据存在
+    if (list) {
+        // string->js对象(数组)
+        list = JSON.parse(list);
+    } else {
+        // 数据不存在
+        // 初始数据 空数组
+        list = [{
+                name: '买菜',
+                isDone: true
+            },
+            {
+                name: '洗菜',
+                isDone: false
+            },
+            {
+                name: '切菜',
+                isDone: false
+            },
+            {
+                name: '烧菜',
+                isDone: false
+            }
+        ]
+    }
+
+
+    /*
+        值类型赋值 拷贝赋值
+            let numA = 10;
+            let numB = numA; numB拷贝一份赋值给 numB 
+            numB = 998;
+            numA=10;
+        引用类型赋值
+            let obj = {name:'jack',lover:'rose'}
+            let obj2 = obj;
+            obj2.lover="常某";
+            obj.lover
+    */
+//    本来全局的保存数据函数
+    // function saveData() {
+    //     // window.localStorage.setItem('list',JSON.stringify(list));
+    //     window.localStorage.setItem('list', JSON.stringify(app.list));
+    // }
+
+
+    let app = new Vue({
+        // 选择器
+        el: '#app',
+        // 普通数据
+        data: {
+            someThing: '',
+            list
+        },
+        // 绑定的方法
+        methods: {
+            // 新增待办事项
+            add() {
+                // 增加到数组中
+                this.list.push({
+                    name: this.someThing,
+                    isDone: false
+                })
+                this.saveData();
+
+            },
+            // 干完某件事
+            doThis(index) {
+                // 修改 对应的 数组中元素的 isDome 取反
+                this.list[index].isDone = !this.list[index].isDone;
+                this.saveData();
+            },
+            remove(index) {
+                this.list.splice(index, 1);
+                this.saveData();
+            },
+            saveData() {
+                // window.localStorage.setItem('list',JSON.stringify(list));
+                window.localStorage.setItem('list', JSON.stringify(app.list));
+            }
+        },
+        computed: {
+            // doneNum:function(){}
+            doneNum() {
+                // 计算isDone为 true的总数
+                let num = 0;
+                for (let i = 0; i < this.list.length; i++) {
+                    if (this.list[i].isDone) {
+                        num++;
+                    }
+                }
+
+                return num;
+            }
+        }
+    })
+</script>
